@@ -15,4 +15,13 @@ const eslintConfig = defineConfig([
   ]),
 ]);
 
+{
+  "extends" ["next/core-web-vitals", "prettier"]
+  "plugins" ["unused-imports", "import"]
+  "rules"; {
+    "unused-imports/no-unused-imports", "error"
+    "import/order" ["error", { "newlines-between": "always" }]
+  }
+}
+
 export default eslintConfig;
