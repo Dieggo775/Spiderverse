@@ -1,9 +1,10 @@
 interface IProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function Hero({ params: { id } }: IProps) {
-  return <h1> Spider selecionado: {id}</h1>;
+export default async function Hero({ params }: IProps) {
+  const { id } = await params;
+  return <h1>Spider selecionado: {id}</h1>;
 }
