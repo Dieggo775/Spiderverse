@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import HeroDetails from "../HeroDetails";
 
@@ -25,7 +25,22 @@ interface IProps {
 export default function Carousel({ heroes, activeId }: IProps) {
   const [visibleItems, setVisibleItems] = useState<IHeroData[] | null>(null);
   const [activeIndex, setActiveIndex] = useState<number>(
-    heroes.findIndex((hero) => hero.id === activeId),
+    heroes.findIndex((hero) => hero.id === activeId) - 1,
+  );
+
+  const transitionAudio = useMemo(() => new Audio("/songs/transition.mp3"), []);
+
+  const voicesAudio: Record<string, HTMLAudioElement> = useMemo(
+    () => ({
+      "spider-man-616": new Audio("/songs/spider-man-616.mp3"),
+      "mulher-aranha-65": new Audio("/songs/mulher-aranha-65.mp3"),
+      "spider-man-1610": new Audio("/songs/spider-man-1610.mp3"),
+      "sp-dr-14512": new Audio("/songs/sp-dr-14512.mp3"),
+      "spider-ham-8311": new Audio("/songs/spider-ham-8311.mp3"),
+      "spider-man-90214": new Audio("/songs/spider-man-90214.mp3"),
+      "spider-man-928": new Audio("/songs/spider-man-928.mp3"),
+    }),
+    [],
   );
 
   useEffect(() => {
@@ -39,6 +54,39 @@ export default function Carousel({ heroes, activeId }: IProps) {
 
     setVisibleItems(visibleItems);
   }, [heroes, activeIndex]);
+
+  useEffect(() => {
+    const htmlEl = document.querySelector("html");
+
+    if (!htmlEl || !visibleItems) {
+      return;
+    }
+
+    const currentHeroId = visibleItems[enPosition.MIDDLE].id;
+    htmlEl.style.backgroundImage = `url("/spiders/${currentHeroId}-background.png")`;
+    htmlEl.classList.add("hero-page");
+
+    return () => {
+      htmlEl.classList.remove("hero-page");
+    };
+  }, [visibleItems]);
+
+  useEffect(() => {
+    if (!visibleItems) {
+      return;
+    }
+
+    transitionAudio.play();
+
+    const voiceAudio = voicesAudio[visibleItems[enPosition.MIDDLE].id];
+
+    if (!voiceAudio) {
+      return;
+    }
+
+    //voiceAudio.volume = 0.3;
+    voiceAudio.play();
+  }, [visibleItems, transitionAudio, voicesAudio]);
 
   // Altera heroi ativo no carrossel
   // +1 rotaciona no sentido horário
@@ -75,9 +123,14 @@ export default function Carousel({ heroes, activeId }: IProps) {
         </div>
       </div>
 
-      <div className={styles.details}>
-        <HeroDetails data={heroes[0]} />
-      </div>
+      <motion.div
+        className={styles.details}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1, duration: 2 }}
+      >
+        <HeroDetails data={visibleItems[enPosition.MIDDLE]} />
+      </motion.div>
     </div>
   );
 }
